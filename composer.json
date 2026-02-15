@@ -21,7 +21,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "SoftigitalDev\\Core\\CoreServiceProvider"
+                "SoftigitalDev\\Core\\Providers\\CoreServiceProvider"
             ]
         }
     }

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\GoogleLoginRequest;
 use App\Models\User;
-use App\Util\ApiResponse;
+use App\Utils\ApiResponse;
 use Google\Client as GoogleClient;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
