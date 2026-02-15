@@ -104,7 +104,7 @@ PHP;
 
         // Insert then: before the closing ) of withRouting
         // Match the last parameter line before the closing )
-        $content = preg_replace(
+        $content = preg_replace_callback(
             '/(->withRouting\()(.*?)(^\s*\))/ms',
             function ($matches) use ($thenClosure) {
                 $opening = $matches[1];
