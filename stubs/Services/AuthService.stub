@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+
+const REFERRAL_BONUS_CREDITS = 5;
+class AuthService
+{
+    public function register($data)
+    {
+        if (User::where('email', $data['email'])->exists()) {
+            throw new BadRequestHttpException('Email already exists');
+        }
+
+        $user = User::create($data);
+
+        return $user->refresh();
+    }
+
+    public function login($data)
+    {
+        $user = User::where('email', $data['email'])->first();
+
+        if (! $user || ! Hash::check($data['password'], $user->password)) {
+            throw new BadRequestHttpException('Invalid credentials');
+        }
+
+        return $user;
+    }
+}

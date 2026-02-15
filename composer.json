@@ -1,0 +1,28 @@
+{
+    "name": "softigital-dev/core",
+    "description": "some of our usefull things that is needed in any laravel project",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "SoftigitalDev\\Core\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "youssef ehab",
+            "email": "youssef.ehab@softigital.com"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^11.0|^12.0"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "SoftigitalDev\\Core\\CoreServiceProvider"
+            ]
+        }
+    }
+}

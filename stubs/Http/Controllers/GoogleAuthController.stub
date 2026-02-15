@@ -1,0 +1,83 @@
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\GoogleLoginRequest;
+use App\Models\User;
+use App\Util\ApiResponse;
+use Google\Client as GoogleClient;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+
+class GoogleAuthController extends Controller
+{
+    protected $client;
+    public function __construct()
+    {
+        $this->client = new GoogleClient(['client_id' => config('google.client_id')]);
+    }
+
+    /**
+     * Authenticate user with Google ID token
+     */
+    public function authenticate(GoogleLoginRequest $request)
+    {
+
+        try {
+            // Initialize Google Client
+            $client = $this->client;
+
+            // Verify the ID token
+            $payload = $client->verifyIdToken($request->id_token);
+
+            if (! $payload) {
+                return ApiResponse::badRequest('Invalid Google ID token');
+            }
+
+            // Extract user data from token payload
+            $googleId = $payload['sub'];
+            $email = $payload['email'];
+            $firstName = $payload['given_name'] ?? null;
+            $lastName = $payload['family_name'] ?? null; // taking it as first and last so you edit it as you want
+
+            $user = User::where('google_id', $googleId)->first();
+            $firstTime = false;
+
+            if (! $user) {
+
+                $user = User::where('email', $email)->first();
+
+                if ($user) {
+                    throw new BadRequestHttpException('Email already in use by another account without google auth');
+                }
+
+                $firstTime = true;
+                $user = User::create([
+                    'name' => trim("$firstName $lastName"),
+                    'email' => $email,
+                    'google_id' => $googleId,
+                    'password' => bcrypt(Str::password(16)), // Random password since they use Google auth
+                ]);
+            }
+
+            // Create Sanctum token
+            $token = $user->createToken('google-auth')->plainTextToken;
+
+            return ApiResponse::success(
+                'User authenticated successfully',
+                [
+                    'token' => $token,
+                    'user' => $user,
+                    'first_time' => $firstTime,
+                ]
+            );
+        } catch (\Google\Exception|BadRequestHttpException $e) {
+
+            return ApiResponse::badRequest('Google authentication failed: '.$e->getMessage());
+        } catch (\Exception $e) {
+
+            return ApiResponse::error('Authentication failed: '.$e->getMessage());
+        }
+    }
+}
