@@ -34,7 +34,7 @@ trait ManagesRoutes
             $this->components->info('Moved routes/api.php → routes/v1/api.php');
         } else {
             $this->components->info('Installing API routes via install:api...');
-            $this->callSilently('install:api');
+            $this->call('install:api', ['--no-interaction' => true]);
 
             // After install:api, api.php is at routes/api.php
             if (File::exists($rootApiPath)) {
