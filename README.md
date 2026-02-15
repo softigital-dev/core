@@ -14,6 +14,7 @@ A Laravel package that provides essential authentication components and utilitie
 - **📦 API Response Utilities**: Standardized JSON response formatting
 - **🛡️ Smart Middleware**: Auto-applied JSON responses & optional authentication
 - **⚙️ Configurable**: Publish and customize middleware behavior
+- **🎨 Code Generators**: Quick commands to create routes and services
 - **⚡ Quick Installation**: One command to scaffold complete features
 - **🎯 Laravel 11+ Ready**: Optimized for modern Laravel applications
 - **🔄 Route Management**: Automatic v1 API route structure setup
@@ -174,7 +175,265 @@ GOOGLE_REDIRECT_URI=your-redirect-uri
 
 ---
 
-## 🎨 Command Options
+## 🛠️ Generator Commands
+
+The package includes convenient generator commands to speed up development:
+
+### Make Route File
+
+Create a new route file in `routes/v1/` and automatically register it:
+
+```bash
+# Basic route file
+php artisan make:route posts
+
+# With controller scaffolding
+php artisan make:route posts --controller=PostController
+
+# With API resource routes
+php artisan make:route posts --controller=PostController --api
+
+# With full resource routes
+php artisan make:route posts --controller=PostController --resource
+```
+
+**What it creates:**
+- `routes/v1/posts.php` with route scaffolding
+- Automatically adds `require __DIR__.'/posts.php';` to `routes/v1/api.php`
+- Includes controller import if `--controller` is specified
+- Generates resourceful routes if `--resource` or `--api` is used
+
+**Example output (`routes/v1/posts.php`):**
+```php
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PostController;
+
+// posts routes
+Route::apiResource('posts', PostController::class);
+```
+
+### Make Service Class
+
+Create a service class in `app/Services/`:
+
+```bash
+# Basic service
+php artisan make:service Post
+
+# Service with model (auto-appends "Service" to name)
+php artisan make:service Post --model=Post
+
+# Repository pattern service with CRUD methods
+php artisan make:service Post --model=Post --repository
+
+# Organize in subdirectories (supports /, \, or . notation)
+php artisan make:service Blog/Post
+php artisan make:service Auth\Login --model=User --repository
+php artisan make:service Api.V1.Post
+```
+
+**What it creates:**
+- `app/Services/PostService.php` (or in subdirectories)
+- Automatically appends "Service" suffix if not provided
+- Proper PSR-4 namespaces for subdirectories
+- Scaffolds CRUD methods with `--repository` flag
+
+**Subdirectory Support:**
+The command intelligently handles nested directories:
+
+```bash
+php artisan make:service Auth/LoginService
+# Creates: app/Services/Auth/LoginService.php
+# Namespace: App\Services\Auth
+
+php artisan make:service Blog/Post/PostService --repository
+# Creates: app/Services/Blog/Post/PostService.php
+# Namespace: App\Services\Blog\Post
+```
+
+**Example output (with `--repository`):**
+```php
+<?php
+
+namespace App\Services;
+
+use App\Models\Post;
+
+class PostService
+{
+    /**
+     * Get all posts.
+     */
+    public function getAll()
+    {
+        return Post::all();
+    }
+
+    /**
+     * Find a post by ID.
+     */
+    public function findById($id)
+    {
+        return Post::findOrFail($id);
+    }
+
+    /**
+     * Create a new post.
+     */
+    public function create(array $data)
+    {
+        return Post::create($data);
+    }
+
+    /**
+     * Update a post.
+     */
+    public function update($id, array $data)
+    {
+        $post = $this->findById($id);
+        $post->update($data);
+        return $post;
+    }
+
+    /**
+     * Delete a post.
+     */
+    public function delete($id)
+    {
+        $post = $this->findById($id);
+        return $post->delete();
+    }
+}
+```
+
+---
+
+## 🎨 Command Reference
+
+### Installation Commands
+
+**`php artisan softigital:install {type}`**
+
+Install pre-built authentication components.
+
+| Type | Description | Options |
+|------|-------------|---------|
+| `auth` | Basic authentication (login, register, profile) | `--force` |
+| `google-auth` | Google OAuth authentication | `--force`, `--skip-migration`, `--skip-composer` |
+
+**Options:**
+- `--force` - Overwrite existing files without prompting
+- `--skip-migration` - Skip publishing and running migrations (google-auth only)
+- `--skip-composer` - Skip automatic composer package installation
+- `--help`, `-h` - Display detailed help information
+
+**Examples:**
+```bash
+# Install basic auth
+php artisan softigital:install auth
+
+# Install Google auth without migrations
+php artisan softigital:install google-auth --skip-migration
+
+# Force overwrite all files
+php artisan softigital:install auth --force
+```
+
+---
+
+### Generator Commands
+
+#### **`php artisan make:route {name}`**
+
+Create a new route file in `routes/v1/` and auto-register it.
+
+**Options:**
+| Option | Description |
+|--------|-------------|
+| `--controller=Name` | Specify a controller and scaffold routes |
+| `--resource` | Create full resourceful routes (includes create/edit) |
+| `--api` | Create API resource routes (excludes create/edit) |
+
+**Examples:**
+```bash
+# Simple route file
+php artisan make:route posts
+
+# With controller scaffolding
+php artisan make:route posts --controller=PostController
+
+# API resource routes (recommended for APIs)
+php artisan make:route posts --controller=PostController --api
+
+# Full resource routes (for web apps)
+php artisan make:route posts --controller=PostController --resource
+```
+
+**What it does:**
+- ✅ Creates `routes/v1/{name}.php`
+- ✅ Adds controller import if `--controller` specified
+- ✅ Generates route definitions based on options
+- ✅ Registers route file in `routes/v1/api.php`
+- ✅ Prevents duplicates
+
+---
+
+#### **`php artisan make:service {name}`**
+
+Create a service class in `app/Services/` with optional subdirectories.
+
+**Options:**
+| Option | Description |
+|--------|-------------|
+| `--model=Name` | Inject model dependency and add model reference |
+| `--repository` | Generate full CRUD repository pattern methods |
+
+**Examples:**
+```bash
+# Basic service
+php artisan make:service Post
+
+# Service with model reference
+php artisan make:service Post --model=Post
+
+# Full repository with CRUD
+php artisan make:service Post --model=Post --repository
+
+# Organized in subdirectories
+php artisan make:service Auth/Login
+php artisan make:service Blog/Post/PostService --repository
+
+# Multiple notation styles supported
+php artisan make:service Auth\Login       # Backslash
+php artisan make:service Auth.Login       # Dot notation
+php artisan make:service Auth/Login       # Forward slash (recommended)
+```
+
+**What it does:**
+- ✅ Creates `app/Services/{name}Service.php`
+- ✅ Auto-appends "Service" suffix if missing
+- ✅ Supports nested directory structure
+- ✅ Generates proper PSR-4 namespaces
+- ✅ Scaffolds CRUD methods with `--repository`
+- ✅ Shows usage example in output
+
+**Generated structure examples:**
+```
+app/Services/
+├── PostService.php                    # Simple service
+├── Auth/
+│   ├── LoginService.php              # Nested service
+│   └── RegisterService.php
+└── Blog/
+    └── Post/
+        └── PostService.php           # Deep nesting
+```
+
+---
+
+## 🎨 Legacy Command Options
 
 ### Available Options
 
@@ -199,6 +458,102 @@ php artisan softigital:install google-auth --skip-composer
 
 # Combine multiple options
 php artisan softigital:install google-auth --force --skip-migration
+```
+
+---
+
+## 💡 Quick Start Recipes
+
+### Recipe 1: Complete REST API for a Resource
+
+Build a full CRUD API in under 30 seconds:
+
+```bash
+# 1. Create the route file with API resource routes
+php artisan make:route posts --controller=PostController --api
+
+# 2. Create the service with repository pattern
+php artisan make:service Post --model=Post --repository
+
+# 3. Create the controller
+php artisan make:controller PostController --api
+
+# 4. Create form requests
+php artisan make:request StorePostRequest
+php artisan make:request UpdatePostRequest
+```
+
+**Wire it up:**
+```php
+// app/Http/Controllers/PostController.php
+class PostController extends Controller
+{
+    public function __construct(protected PostService $postService) {}
+
+    public function index()
+    {
+        return ApiResponse::success('Posts retrieved', $this->postService->getAll());
+    }
+
+    public function store(StorePostRequest $request)
+    {
+        return ApiResponse::created('Post created', $this->postService->create($request->validated()));
+    }
+}
+```
+
+✅ **You now have:** Routes → Controller → Service → Model architecture!
+
+---
+
+### Recipe 2: Organized Service Structure
+
+Keep large projects organized with subdirectories:
+
+```bash
+# Authentication services
+php artisan make:service Auth/Login --model=User --repository
+php artisan make:service Auth/Register --model=User
+php artisan make:service Auth/PasswordReset
+
+# Blog services
+php artisan make:service Blog/Post --model=Post --repository
+php artisan make:service Blog/Comment --model=Comment --repository
+php artisan make:service Blog/Category --model=Category
+
+# Payment services
+php artisan make:service Payment/Stripe
+php artisan make:service Payment/PayPal
+```
+
+**Resulting structure:**
+```
+app/Services/
+├── Auth/
+│   ├── LoginService.php
+│   ├── RegisterService.php
+│   └── PasswordResetService.php
+├── Blog/
+│   ├── PostService.php
+│   ├── CommentService.php
+│   └── CategoryService.php
+└── Payment/
+    ├── StripeService.php
+    └── PayPalService.php
+```
+
+---
+
+### Recipe 3: Multi-Version API
+
+Create versioned route files for API evolution:
+
+```bash
+# Version 1 routes
+php artisan make:route users --controller=Api\V1\UserController --api
+php artisan make:route posts --controller=Api\V1\PostController --api
+
+# All route files go to routes/v1/ automatically!
 ```
 
 ---
