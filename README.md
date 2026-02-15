@@ -1,259 +1,254 @@
 # Softigital Core
 
-A Laravel package that provides essential authentication components and utilities for rapid API development. Streamline your Laravel projects with pre-built authentication, Google OAuth, and standardized API responses.
+**A powerful Laravel package for rapid API development with authentication, code generators, and smart middleware.**
+
+Streamline your Laravel projects with pre-built authentication components, Google OAuth integration, standardized API responses, and intelligent code generators that follow best practices.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Laravel Version](https://img.shields.io/badge/Laravel-11%2B-red.svg)](https://laravel.com)
 
 ---
 
-## 🚀 Features
+## 📑 Table of Contents
 
-- **🔐 Authentication System**: Complete authentication with login, register, and user profile endpoints
-- **🌐 Google OAuth**: Ready-to-use Google authentication integration
-- **📦 API Response Utilities**: Standardized JSON response formatting
-- **🛡️ Smart Middleware**: Auto-applied JSON responses & optional authentication
-- **⚙️ Configurable**: Publish and customize middleware behavior
-- **🎨 Code Generators**: Quick commands to create routes and services
-- **⚡ Quick Installation**: One command to scaffold complete features
-- **🎯 Laravel 11+ Ready**: Optimized for modern Laravel applications
-- **🔄 Route Management**: Automatic v1 API route structure setup
+- [Overview](#-overview)
+- [Requirements](#-requirements)
+- [Installation](#-installation)
+- [Quick Start Guide](#-quick-start-guide)
+- [Commands Reference](#-commands-reference)
+  - [Installation Commands](#installation-commands)
+  - [Generator Commands](#generator-commands)
+- [Middleware](#-middleware)
+- [API Response Utility](#-api-response-utility)
+- [Usage Examples](#-usage-examples)
+- [Configuration](#-configuration)
+- [Testing](#-testing)
+- [Security](#-security)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+---
+
+## 🎯 Overview
+
+Softigital Core is designed to eliminate repetitive boilerplate code and accelerate Laravel API development. Install complete authentication systems with a single command, generate well-structured services and routes instantly, and enjoy auto-configured middleware that just works.
+
+**Key Features:**
+- 🔐 Complete authentication system (register, login, profile)
+- 🌐 Google OAuth integration with ID token verification
+- 📦 Standardized JSON response formatting
+- 🛡️ Smart middleware (auto-applied JSON responses, optional auth)
+- 🎨 Code generators for routes and services
+- 📂 Automatic API route structure (v1 versioning)
+- ⚙️ Fully configurable via published config file
 
 ---
 
 ## 📋 Requirements
 
-- PHP 8.2 or higher
-- Laravel 11.0 or higher
-- Laravel Sanctum (for token-based authentication)
+- **PHP**: 8.2 or higher
+- **Laravel**: 11.0 or higher
+- **Laravel Sanctum**: For token-based authentication
 
 ---
 
 ## 📦 Installation
 
-Install the package via Composer:
+Install via Composer:
 
 ```bash
 composer require softigital-dev/core
 ```
 
-The service provider will be automatically registered via Laravel's package auto-discovery.
+The service provider registers automatically via Laravel's package auto-discovery.
 
-### Publish Configuration (Optional)
+### Optional: Publish Configuration
 
-Publish the configuration file to customize middleware behavior:
+To customize middleware behavior:
 
 ```bash
 php artisan vendor:publish --tag=softigital-config
 ```
 
-This creates `config/softigital-core.php` where you can enable/disable middleware.
+This creates `config/softigital-core.php` for middleware configuration.
 
 ---
 
-## 🛡️ Middleware
+## 🚀 Quick Start Guide
 
-The package includes two powerful middleware that enhance your API:
+### 1. Install Basic Authentication
 
-### 1. Force JSON Response (Auto-Applied)
-
-Automatically forces all API requests to accept JSON responses. This prevents HTML error pages and ensures consistent API behavior.
-
-**Configuration** (`config/softigital-core.php`):
-```php
-'force_json' => [
-    'enabled' => true,      // Enable/disable the middleware
-    'auto_apply' => true,   // Automatically apply to 'api' middleware group
-],
-```
-
-**What it does:**
-- Sets `Accept: application/json` header for all routes starting with `api/`
-- Ensures Laravel returns JSON for validation errors and exceptions
-- Prevents accidental HTML responses in your API
-
-**Disable it:**
-```php
-// config/softigital-core.php
-'force_json' => [
-    'enabled' => false,
-],
-```
-
-### 2. Optional Sanctum Authentication
-
-Provides optional authentication for routes that work with or without a user.
-
-**Configuration** (`config/softigital-core.php`):
-```php
-'optional_auth' => [
-    'enabled' => true,
-],
-```
-
-**Usage in routes:**
-```php
-// Route works for both authenticated and guest users
-Route::get('/posts', [PostController::class, 'index'])
-    ->middleware('auth.optional');
-
-// In your controller
-public function index(Request $request)
-{
-    $user = $request->user(); // null if not authenticated
-    
-    if ($user) {
-        // Return personalized content
-    } else {
-        // Return public content
-    }
-}
-```
-
-**Use cases:**
-- Public endpoints with personalized content for logged-in users
-- Like/favorite features that work for guests but save for authenticated users
-- Content that's different based on authentication status
-
----
-
-## 🎯 Quick Start
-
-### Display Help
-
-```bash
-php artisan softigital:install --help
-```
-
-### Install Basic Authentication
-
-Install the complete authentication system with login, register, and user profile endpoints:
+Install a complete authentication system with one command:
 
 ```bash
 php artisan softigital:install auth
 ```
 
-**What gets installed:**
-- `app/Utils/ApiResponse.php` - Standardized API response utility
-- `app/Http/Controllers/Auth/AuthController.php` - Authentication controller
-- `app/Http/Requests/LoginRequest.php` - Login validation
-- `app/Http/Requests/RegisterRequest.php` - Registration validation
-- `app/Services/AuthService.php` - Authentication business logic
-- `routes/v1/auth.php` - Authentication routes
+**What you get:**
+- Login endpoint (`POST /api/v1/auth/login`)
+- Register endpoint (`POST /api/v1/auth/register`)
+- Profile endpoint (`GET /api/v1/auth/me`)
+- Complete controllers, services, requests, and routes
 
-**Available endpoints:**
-- `POST /api/v1/auth/register` - User registration
-- `POST /api/v1/auth/login` - User login
-- `GET /api/v1/auth/me` - Get authenticated user (requires Sanctum token)
+### 2. Generate Additional Resources
 
-### Install Google OAuth Authentication
-
-Install Google authentication with ID token verification:
+Create a full CRUD API in seconds:
 
 ```bash
-php artisan softigital:install google-auth
+# Create route file with API resource routes
+php artisan make:route posts --controller=PostController --api
+
+# Generate service with repository pattern
+php artisan make:service Post --model=Post --repository
 ```
 
-**What gets installed:**
-- All shared utilities (if not already present)
-- `app/Http/Controllers/Auth/GoogleAuthController.php` - Google auth controller
-- `app/Http/Requests/GoogleLoginRequest.php` - Google login validation
-- `config/google.php` - Google OAuth configuration
-- `routes/v1/google.php` - Google authentication routes
-- Migration for `google_id` column in users table
-- `google/apiclient` composer package (with confirmation)
+### 3. Start Using
 
-**Available endpoints:**
-- `POST /api/v1/auth/google` - Authenticate with Google ID token
+Your API is ready! The middleware automatically handles JSON responses.
 
-**After installation**, add to your `.env`:
-```env
-GOOGLE_CLIENT_ID=your-client-id
-GOOGLE_CLIENT_SECRET=your-client-secret
-GOOGLE_REDIRECT_URI=your-redirect-uri
+```bash
+# Test the registration endpoint
+curl -X POST http://localhost/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"John","email":"john@example.com","password":"secret123"}'
 ```
 
 ---
 
-## 🛠️ Generator Commands
+## 📚 Commands Reference
 
-The package includes convenient generator commands to speed up development:
+### Installation Commands
 
-### Make Route File
+#### `softigital:install {type}`
 
-Create a new route file in `routes/v1/` and automatically register it:
+Install pre-built authentication components.
+
+**Available Types:**
+
+| Type | Description | What Gets Installed |
+|------|-------------|---------------------|
+| `auth` | Basic authentication | AuthController, AuthService, LoginRequest, RegisterRequest, routes |
+| `google-auth` | Google OAuth | GoogleAuthController, GoogleLoginRequest, google config, migration, google/apiclient package |
+
+**Options:**
+- `--force` : Overwrite existing files without prompting
+- `--skip-migration` : Skip migration publishing and execution (google-auth only)
+- `--skip-composer` : Skip composer package installation
+
+**Examples:**
+
+```bash
+# Install basic authentication
+php artisan softigital:install auth
+
+# Install Google OAuth with force overwrite
+php artisan softigital:install google-auth --force
+
+# Install without running migrations
+php artisan softigital:install google-auth --skip-migration
+
+# Display help
+php artisan softigital:install --help
+```
+
+**After installing Google auth, configure `.env`:**
+```env
+GOOGLE_CLIENT_ID=your-client-id-here
+GOOGLE_CLIENT_SECRET=your-client-secret-here
+GOOGLE_REDIRECT_URI=your-redirect-uri-here
+```
+
+---
+
+### Generator Commands
+
+#### `make:route {name}`
+
+Create a new route file in `routes/v1/` with automatic registration.
+
+**Options:**
+- `--controller=Name` : Specify controller and import it
+- `--resource` : Generate full resourceful routes (index, create, store, show, edit, update, destroy)
+- `--api` : Generate API resource routes (excludes create, edit)
+
+**Examples:**
 
 ```bash
 # Basic route file
 php artisan make:route posts
 
-# With controller scaffolding
+# With controller
 php artisan make:route posts --controller=PostController
 
-# With API resource routes
+# API resource routes (recommended for APIs)
 php artisan make:route posts --controller=PostController --api
 
-# With full resource routes
-php artisan make:route posts --controller=PostController --resource
+# Full resource routes
+php artisan make:route products --controller=ProductController --resource
 ```
 
-**What it creates:**
-- `routes/v1/posts.php` with route scaffolding
-- Automatically adds `require __DIR__.'/posts.php';` to `routes/v1/api.php`
-- Includes controller import if `--controller` is specified
-- Generates resourceful routes if `--resource` or `--api` is used
-
-**Example output (`routes/v1/posts.php`):**
+**Generated file (`routes/v1/posts.php`):**
 ```php
 <?php
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
 
-// posts routes
 Route::apiResource('posts', PostController::class);
 ```
 
-### Make Service Class
+The route file is automatically registered in `routes/v1/api.php`.
 
-Create a service class in `app/Services/`:
+---
+
+#### `make:service {name}`
+
+Generate service classes in `app/Services/` with subdirectory support.
+
+**Options:**
+- `--model=Name` : Inject model dependency
+- `--repository` : Generate CRUD repository pattern methods
+
+**Subdirectory Support:**
+Use `/`, `\`, or `.` notation for nested directories:
+
+```bash
+# All these work the same:
+php artisan make:service Auth/Login
+php artisan make:service Auth\Login
+php artisan make:service Auth.Login
+```
+
+**Examples:**
 
 ```bash
 # Basic service
 php artisan make:service Post
 
-# Service with model (auto-appends "Service" to name)
+# Service with model
 php artisan make:service Post --model=Post
 
-# Repository pattern service with CRUD methods
+# Full repository pattern with CRUD
 php artisan make:service Post --model=Post --repository
 
-# Organize in subdirectories (supports /, \, or . notation)
-php artisan make:service Blog/Post
-php artisan make:service Auth\Login --model=User --repository
-php artisan make:service Api.V1.Post
+# Organized in subdirectories
+php artisan make:service Auth/Login --model=User --repository
+php artisan make:service Blog/Post --repository
+php artisan make:service Payment/Stripe
 ```
 
-**What it creates:**
-- `app/Services/PostService.php` (or in subdirectories)
-- Automatically appends "Service" suffix if not provided
-- Proper PSR-4 namespaces for subdirectories
-- Scaffolds CRUD methods with `--repository` flag
-
-**Subdirectory Support:**
-The command intelligently handles nested directories:
-
-```bash
-php artisan make:service Auth/LoginService
-# Creates: app/Services/Auth/LoginService.php
-# Namespace: App\Services\Auth
-
-php artisan make:service Blog/Post/PostService --repository
-# Creates: app/Services/Blog/Post/PostService.php
-# Namespace: App\Services\Blog\Post
+**Generated structure:**
+```
+app/Services/
+├── PostService.php
+├── Auth/
+│   ├── LoginService.php
+│   └── RegisterService.php
+└── Blog/
+    └── PostService.php
 ```
 
-**Example output (with `--repository`):**
+**Generated service with `--repository` (`app/Services/PostService.php`):**
 ```php
 <?php
 
@@ -263,33 +258,21 @@ use App\Models\Post;
 
 class PostService
 {
-    /**
-     * Get all posts.
-     */
     public function getAll()
     {
         return Post::all();
     }
 
-    /**
-     * Find a post by ID.
-     */
     public function findById($id)
     {
         return Post::findOrFail($id);
     }
 
-    /**
-     * Create a new post.
-     */
     public function create(array $data)
     {
         return Post::create($data);
     }
 
-    /**
-     * Update a post.
-     */
     public function update($id, array $data)
     {
         $post = $this->findById($id);
@@ -297,9 +280,6 @@ class PostService
         return $post;
     }
 
-    /**
-     * Delete a post.
-     */
     public function delete($id)
     {
         $post = $this->findById($id);
@@ -310,321 +290,174 @@ class PostService
 
 ---
 
-## 🎨 Command Reference
+## 🛡️ Middleware
 
-### Installation Commands
+## 🛡️ Middleware
 
-**`php artisan softigital:install {type}`**
+The package includes two smart middleware that enhance your API automatically.
 
-Install pre-built authentication components.
+### Force JSON Response
 
-| Type | Description | Options |
-|------|-------------|---------|
-| `auth` | Basic authentication (login, register, profile) | `--force` |
-| `google-auth` | Google OAuth authentication | `--force`, `--skip-migration`, `--skip-composer` |
+Ensures all API requests return JSON (no HTML error pages).
 
-**Options:**
-- `--force` - Overwrite existing files without prompting
-- `--skip-migration` - Skip publishing and running migrations (google-auth only)
-- `--skip-composer` - Skip automatic composer package installation
-- `--help`, `-h` - Display detailed help information
+**Auto-Applied:** Automatically applies to all `api/*` routes.
 
-**Examples:**
-```bash
-# Install basic auth
-php artisan softigital:install auth
-
-# Install Google auth without migrations
-php artisan softigital:install google-auth --skip-migration
-
-# Force overwrite all files
-php artisan softigital:install auth --force
-```
-
----
-
-### Generator Commands
-
-#### **`php artisan make:route {name}`**
-
-Create a new route file in `routes/v1/` and auto-register it.
-
-**Options:**
-| Option | Description |
-|--------|-------------|
-| `--controller=Name` | Specify a controller and scaffold routes |
-| `--resource` | Create full resourceful routes (includes create/edit) |
-| `--api` | Create API resource routes (excludes create/edit) |
-
-**Examples:**
-```bash
-# Simple route file
-php artisan make:route posts
-
-# With controller scaffolding
-php artisan make:route posts --controller=PostController
-
-# API resource routes (recommended for APIs)
-php artisan make:route posts --controller=PostController --api
-
-# Full resource routes (for web apps)
-php artisan make:route posts --controller=PostController --resource
-```
-
-**What it does:**
-- ✅ Creates `routes/v1/{name}.php`
-- ✅ Adds controller import if `--controller` specified
-- ✅ Generates route definitions based on options
-- ✅ Registers route file in `routes/v1/api.php`
-- ✅ Prevents duplicates
-
----
-
-#### **`php artisan make:service {name}`**
-
-Create a service class in `app/Services/` with optional subdirectories.
-
-**Options:**
-| Option | Description |
-|--------|-------------|
-| `--model=Name` | Inject model dependency and add model reference |
-| `--repository` | Generate full CRUD repository pattern methods |
-
-**Examples:**
-```bash
-# Basic service
-php artisan make:service Post
-
-# Service with model reference
-php artisan make:service Post --model=Post
-
-# Full repository with CRUD
-php artisan make:service Post --model=Post --repository
-
-# Organized in subdirectories
-php artisan make:service Auth/Login
-php artisan make:service Blog/Post/PostService --repository
-
-# Multiple notation styles supported
-php artisan make:service Auth\Login       # Backslash
-php artisan make:service Auth.Login       # Dot notation
-php artisan make:service Auth/Login       # Forward slash (recommended)
-```
-
-**What it does:**
-- ✅ Creates `app/Services/{name}Service.php`
-- ✅ Auto-appends "Service" suffix if missing
-- ✅ Supports nested directory structure
-- ✅ Generates proper PSR-4 namespaces
-- ✅ Scaffolds CRUD methods with `--repository`
-- ✅ Shows usage example in output
-
-**Generated structure examples:**
-```
-app/Services/
-├── PostService.php                    # Simple service
-├── Auth/
-│   ├── LoginService.php              # Nested service
-│   └── RegisterService.php
-└── Blog/
-    └── Post/
-        └── PostService.php           # Deep nesting
-```
-
----
-
-## 🎨 Legacy Command Options
-
-### Available Options
-
-| Option | Description |
-|--------|-------------|
-| `--force` | Overwrite existing files without prompting |
-| `--skip-migration` | Skip publishing and running migrations (google-auth only) |
-| `--skip-composer` | Skip automatic composer package installation |
-| `--help`, `-h` | Display detailed help information |
-
-### Examples
-
-```bash
-# Install with force overwrite
-php artisan softigital:install auth --force
-
-# Install Google auth without running migrations
-php artisan softigital:install google-auth --skip-migration
-
-# Install without composer package prompt
-php artisan softigital:install google-auth --skip-composer
-
-# Combine multiple options
-php artisan softigital:install google-auth --force --skip-migration
-```
-
----
-
-## 💡 Quick Start Recipes
-
-### Recipe 1: Complete REST API for a Resource
-
-Build a full CRUD API in under 30 seconds:
-
-```bash
-# 1. Create the route file with API resource routes
-php artisan make:route posts --controller=PostController --api
-
-# 2. Create the service with repository pattern
-php artisan make:service Post --model=Post --repository
-
-# 3. Create the controller
-php artisan make:controller PostController --api
-
-# 4. Create form requests
-php artisan make:request StorePostRequest
-php artisan make:request UpdatePostRequest
-```
-
-**Wire it up:**
+**Configuration (`config/softigital-core.php`):**
 ```php
-// app/Http/Controllers/PostController.php
+'force_json' => [
+    'enabled' => true,      // Enable/disable middleware
+    'auto_apply' => true,   // Auto-apply to 'api' middleware group
+],
+```
+
+**What it does:**
+- Sets `Accept: application/json` header for all API routes
+- Prevents HTML error pages in your API
+- Ensures consistent JSON responses for validation errors and exceptions
+
+**Disable globally:**
+```php
+// config/softigital-core.php
+'force_json' => ['enabled' => false],
+```
+
+---
+
+### Optional Sanctum Authentication
+
+Allows routes to work for both authenticated and guest users.
+
+**Alias:** `auth.optional`
+
+**Configuration:**
+```php
+'optional_auth' => [
+    'enabled' => true,
+],
+```
+
+**Usage Example:**
+```php
+Route::get('/posts', [PostController::class, 'index'])
+    ->middleware('auth.optional');
+```
+
+**In your controller:**
+```php
+public function index(Request $request)
+{
+    $user = $request->user(); // null if guest, User if authenticated
+    
+    if ($user) {
+        return ApiResponse::success('Your posts', $user->posts);
+    }
+    
+    return ApiResponse::success('Public posts', Post::where('public', true)->get());
+}
+```
+
+**Use Cases:**
+- Public feeds with personalized content for logged-in users
+- Like/favorite features that work without login
+- Content that varies based on authentication status
+
+---
+
+## 📦 API Response Utility
+
+The package includes `ApiResponse` utility for standardized JSON responses.
+
+### Available Methods
+
+```php
+use App\Utils\ApiResponse;
+
+// Success (200)
+ApiResponse::success('Operation successful', ['key' => 'value']);
+
+// Created (201)
+ApiResponse::created('Resource created', $resource);
+
+// Bad Request (400)
+ApiResponse::badRequest('Invalid input', ['field' => 'error message']);
+
+// Not Found (404)
+ApiResponse::notFound('Resource not found');
+
+// Forbidden (403)
+ApiResponse::forbidden('Access denied');
+
+// Validation Error (422)
+ApiResponse::validationError('Validation failed', $validator->errors());
+
+// Server Error (500)
+ApiResponse::error('Something went wrong');
+```
+
+### Response Format
+
+All responses follow this structure:
+
+```json
+{
+  "status": 200,
+  "message": "Operation successful",
+  "meta": null,
+  "data": {
+    "key": "value"
+  }
+}
+```
+
+### Usage in Controllers
+
+```php
 class PostController extends Controller
 {
-    public function __construct(protected PostService $postService) {}
+    public function __construct(private PostService $postService) {}
 
     public function index()
     {
-        return ApiResponse::success('Posts retrieved', $this->postService->getAll());
+        $posts = $this->postService->getAll();
+        return ApiResponse::success('Posts retrieved', $posts);
     }
 
     public function store(StorePostRequest $request)
     {
-        return ApiResponse::created('Post created', $this->postService->create($request->validated()));
+        $post = $this->postService->create($request->validated());
+        return ApiResponse::created('Post created successfully', $post);
+    }
+
+    public function show($id)
+    {
+        $post = $this->postService->findById($id);
+        
+        if (!$post) {
+            return ApiResponse::notFound('Post not found');
+        }
+        
+        return ApiResponse::success('Post retrieved', $post);
     }
 }
 ```
 
-✅ **You now have:** Routes → Controller → Service → Model architecture!
-
 ---
 
-### Recipe 2: Organized Service Structure
-
-Keep large projects organized with subdirectories:
-
-```bash
-# Authentication services
-php artisan make:service Auth/Login --model=User --repository
-php artisan make:service Auth/Register --model=User
-php artisan make:service Auth/PasswordReset
-
-# Blog services
-php artisan make:service Blog/Post --model=Post --repository
-php artisan make:service Blog/Comment --model=Comment --repository
-php artisan make:service Blog/Category --model=Category
-
-# Payment services
-php artisan make:service Payment/Stripe
-php artisan make:service Payment/PayPal
-```
-
-**Resulting structure:**
-```
-app/Services/
-├── Auth/
-│   ├── LoginService.php
-│   ├── RegisterService.php
-│   └── PasswordResetService.php
-├── Blog/
-│   ├── PostService.php
-│   ├── CommentService.php
-│   └── CategoryService.php
-└── Payment/
-    ├── StripeService.php
-    └── PayPalService.php
-```
-
----
-
-### Recipe 3: Multi-Version API
-
-Create versioned route files for API evolution:
-
-```bash
-# Version 1 routes
-php artisan make:route users --controller=Api\V1\UserController --api
-php artisan make:route posts --controller=Api\V1\PostController --api
-
-# All route files go to routes/v1/ automatically!
-```
-
----
-
-## 📂 What Gets Configured
-
-### Route Structure
-
-The package automatically sets up a versioned API route structure:
-
-**Before:**
-```
-routes/
-  └── api.php  (or may not exist)
-```
-
-**After:**
-```
-routes/
-  └── v1/
-      ├── api.php
-      ├── auth.php  (if auth installed)
-      └── google.php  (if google-auth installed)
-```
-
-### Bootstrap Configuration
-
-Your `bootstrap/app.php` is automatically updated to use the v1 route structure:
-
-```php
-return Application::configure(basePath: dirname(__DIR__))
-    ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        commands: __DIR__.'/../routes/console.php',
-        channels: __DIR__.'/../routes/channels.php',
-        health: '/health',
-        then: function () {
-            Route::prefix('api/v1')
-                ->middleware('api')
-                ->group(base_path('routes/v1/api.php'));
-        }
-    )
-```
-
-### API Routes
-
-Routes are automatically included in `routes/v1/api.php`:
-
-```php
-<?php
-
-require __DIR__.'/auth.php';  // Added by auth installation
-require __DIR__.'/google.php';  // Added by google-auth installation
-```
-
----
-
-## 🔧 Usage Examples
+## 💻 Usage Examples
 
 ### Authentication Flow
 
-#### 1. Register a New User
+#### Register a New User
 
-```http
+**Request:**
+```bash
 POST /api/v1/auth/register
 Content-Type: application/json
 
 {
   "name": "John Doe",
   "email": "john@example.com",
-  "password": "securepassword123"
+  "password": "securepass123"
 }
 ```
 
@@ -640,20 +473,23 @@ Content-Type: application/json
       "name": "John Doe",
       "email": "john@example.com"
     },
-    "token": "1|abc123..."
+    "token": "1|abc123xyz..."
   }
 }
 ```
 
-#### 2. Login
+---
 
-```http
+#### Login
+
+**Request:**
+```bash
 POST /api/v1/auth/login
 Content-Type: application/json
 
 {
   "email": "john@example.com",
-  "password": "securepassword123"
+  "password": "securepass123"
 }
 ```
 
@@ -669,16 +505,19 @@ Content-Type: application/json
       "name": "John Doe",
       "email": "john@example.com"
     },
-    "token": "2|xyz789..."
+    "token": "2|def456uvw..."
   }
 }
 ```
 
-#### 3. Get Authenticated User
+---
 
-```http
+#### Get Authenticated User Profile
+
+**Request:**
+```bash
 GET /api/v1/auth/me
-Authorization: Bearer 2|xyz789...
+Authorization: Bearer 2|def456uvw...
 ```
 
 **Response:**
@@ -697,16 +536,17 @@ Authorization: Bearer 2|xyz789...
 }
 ```
 
+---
+
 ### Google OAuth Flow
 
-#### Authenticate with Google
-
-```http
+**Request:**
+```bash
 POST /api/v1/auth/google
 Content-Type: application/json
 
 {
-  "id_token": "google-id-token-from-client"
+  "id_token": "google-id-token-from-frontend"
 }
 ```
 
@@ -717,7 +557,7 @@ Content-Type: application/json
   "message": "User authenticated successfully",
   "meta": null,
   "data": {
-    "token": "3|token123...",
+    "token": "3|ghi789rst...",
     "user": {
       "id": 2,
       "name": "Jane Smith",
@@ -729,131 +569,160 @@ Content-Type: application/json
 }
 ```
 
-### Using ApiResponse Utility
-
-The package includes a powerful `ApiResponse` utility for standardized responses:
-
-```php
-use App\Utils\ApiResponse;
-
-// Success response
-return ApiResponse::success('Operation completed', ['key' => 'value']);
-
-// Created response (201)
-return ApiResponse::created('Resource created', $resource);
-
-// Error responses
-return ApiResponse::badRequest('Invalid input');
-return ApiResponse::notFound('Resource not found');
-return ApiResponse::error('Internal server error');
-```
-
-**Available Methods:**
-- `success($message, $data = [])` - 200 OK
-- `created($message, $data = [])` - 201 Created
-- `badRequest($message, $errors = [])` - 400 Bad Request
-- `notFound($message)` - 404 Not Found
-- `forbidden($message)` - 403 Forbidden
-- `validationError($message, $errors)` - 422 Unprocessable Entity
-- `error($message)` - 500 Internal Server Error
-
 ---
 
-## 🛠️ Advanced Usage
+### Complete CRUD Example
 
-### Manual File Publishing
-
-If you need to publish files manually or check what will be installed:
+Building a full REST API for posts:
 
 ```bash
-# View the stub files
-ls vendor/softigital-dev/core/stubs/
+# 1. Create route file with API resource routes
+php artisan make:route posts --controller=PostController --api
 
-# Manually copy if needed (not recommended)
-cp vendor/softigital-dev/core/stubs/Utils/ApiResponse.stub app/Utils/ApiResponse.php
+# 2. Generate service with repository pattern
+php artisan make:service Post --model=Post --repository
+
+# 3. Create controller
+php artisan make:controller PostController --api
+
+# 4. Create form requests
+php artisan make:request StorePostRequest
+php artisan make:request UpdatePostRequest
 ```
 
-### Customizing Published Files
-
-All published files are standard PHP classes that you can modify:
+**Wire up the controller:**
 
 ```php
-// app/Services/AuthService.php
-public function register($data)
+// app/Http/Controllers/PostController.php
+namespace App\Http\Controllers;
+
+use App\Services\PostService;
+use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostRequest;
+use App\Utils\ApiResponse;
+
+class PostController extends Controller
 {
-    // Add your custom logic here
-    if (User::where('email', $data['email'])->exists()) {
-        throw new BadRequestHttpException('Email already exists');
+    public function __construct(private PostService $postService) {}
+
+    public function index()
+    {
+        return ApiResponse::success(
+            'Posts retrieved', 
+            $this->postService->getAll()
+        );
     }
 
-    // Custom user creation logic
-    $user = User::create([
-        'name' => $data['name'],
-        'email' => $data['email'],
-        'password' => Hash::make($data['password']),
-        // Add custom fields
-    ]);
+    public function store(StorePostRequest $request)
+    {
+        $post = $this->postService->create($request->validated());
+        return ApiResponse::created('Post created', $post);
+    }
 
-    return $user->refresh();
+    public function show($id)
+    {
+        $post = $this->postService->findById($id);
+        return ApiResponse::success('Post retrieved', $post);
+    }
+
+    public function update(UpdatePostRequest $request, $id)
+    {
+        $post = $this->postService->update($id, $request->validated());
+        return ApiResponse::success('Post updated', $post);
+    }
+
+    public function destroy($id)
+    {
+        $this->postService->delete($id);
+        return ApiResponse::success('Post deleted');
+    }
 }
 ```
 
-### Extending Controllers
-
-```php
-// app/Http/Controllers/Auth/AuthController.php
-public function logout(Request $request)
-{
-    $request->user()->currentAccessToken()->delete();
-
-    return ApiResponse::success('Logged out successfully');
-}
-```
-
-Then add the route:
-
-```php
-// routes/v1/auth.php
-Route::post('auth/logout', [AuthController::class, 'logout'])
-    ->middleware('auth:sanctum');
-```
+**Your routes are ready:**
+- `GET /api/v1/posts` - List all posts
+- `POST /api/v1/posts` - Create post
+- `GET /api/v1/posts/{id}` - Show post
+- `PUT /api/v1/posts/{id}` - Update post
+- `DELETE /api/v1/posts/{id}` - Delete post
 
 ---
 
-## 🔒 Security Considerations
+## ⚙️ Configuration
 
-### Token Management
+### Route Structure
 
-The package uses Laravel Sanctum for token-based authentication:
+The package automatically creates a versioned API structure:
 
-- Tokens are stored in the `personal_access_tokens` table
-- Each login/registration creates a new token
-- Tokens don't expire by default (configure in `sanctum.php`)
-- Revoke tokens by deleting from the database
+**Generated Structure:**
+```
+routes/
+└── v1/
+    ├── api.php         # Main route file
+    ├── auth.php        # Auth routes (if installed)
+    └── google.php      # Google OAuth routes (if installed)
+```
 
-### Password Security
+### Bootstrap Configuration
 
-- Passwords are hashed using Laravel's default bcrypt
-- Minimum 8 characters enforced in validation
-- Consider adding password confirmation for sensitive operations
+Your `bootstrap/app.php` is automatically updated:
 
-### Google OAuth
+```php
+return Application::configure(basePath: dirname(__DIR__))
+    ->withRouting(
+        web: __DIR__.'/../routes/web.php',
+        commands: __DIR__.'/../routes/console.php',
+        health: '/health',
+        then: function () {
+            Route::prefix('api/v1')
+                ->middleware('api')
+                ->group(base_path('routes/v1/api.php'));
+        }
+    )
+    // ... rest of configuration
+```
 
-- Google ID tokens are verified server-side using Google API Client
-- Never trust tokens without verification
-- Store `google_id` for account linking
-- Handle edge cases (existing email with different auth method)
+### Middleware Configuration
+
+Publish and edit `config/softigital-core.php`:
+
+```php
+return [
+    'force_json' => [
+        'enabled' => true,
+        'auto_apply' => true,  // Auto-apply to 'api' middleware group
+    ],
+
+    'optional_auth' => [
+        'enabled' => true,
+    ],
+];
+```
+
+### Environment Variables (Google OAuth)
+
+Add to `.env` after installing Google authentication:
+
+```env
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/callback
+```
 
 ---
 
 ## 🧪 Testing
 
-### Testing Authentication Endpoints
+### Example Test Cases
 
 ```php
-use Tests\TestCase;
+namespace Tests\Feature;
 
-class AuthTest extends TestCase
+use Tests\TestCase;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+
+class AuthenticationTest extends TestCase
 {
     public function test_user_can_register(): void
     {
@@ -867,11 +736,12 @@ class AuthTest extends TestCase
             ->assertJsonStructure([
                 'status',
                 'message',
-                'data' => [
-                    'user',
-                    'token',
-                ],
+                'data' => ['user', 'token'],
             ]);
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'test@example.com',
+        ]);
     }
 
     public function test_user_can_login(): void
@@ -886,8 +756,24 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-            ->assertJsonStructure([
-                'data' => ['token'],
+            ->assertJsonStructure(['data' => ['token', 'user']]);
+    }
+
+    public function test_authenticated_user_can_get_profile(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token')->plainTextToken;
+
+        $response = $this->withToken($token)
+            ->getJson('/api/v1/auth/me');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'data' => [
+                    'user' => [
+                        'email' => $user->email,
+                    ],
+                ],
             ]);
     }
 }
@@ -895,41 +781,54 @@ class AuthTest extends TestCase
 
 ---
 
+## 🔒 Security
+
+### Token Management
+
+- Uses Laravel Sanctum for secure token-based authentication
+- Tokens stored in `personal_access_tokens` table
+- Each login creates a new token
+- Revoke tokens by deleting from database or calling `$token->delete()`
+
+### Password Security
+
+- Passwords hashed with bcrypt
+- Minimum 8 characters enforced
+- Never logs or displays passwords
+
+### Google OAuth Security
+
+- Google ID tokens verified server-side
+- Uses official Google API Client library
+- `google_id` stored for account linking
+- Handles edge cases (existing email conflicts)
+
+**Best Practices:**
+```php
+// Always verify Google tokens server-side
+$client = new Google_Client(['client_id' => config('google.client_id')]);
+$payload = $client->verifyIdToken($idToken);
+```
+
+---
+
 ## 🤝 Contributing
 
-We welcome contributions! Please follow these guidelines:
+Contributions are welcome! Please follow these steps:
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
 5. Open a Pull Request
 
 ### Development Setup
 
 ```bash
-# Clone the repository
 git clone https://github.com/softigital-dev/core.git
-
-# Install dependencies
+cd core
 composer install
-
-# Run tests (if available)
-composer test
 ```
-
----
-
-## 📝 Changelog
-
-### Version 1.0.0 (2026-02-15)
-
-- Initial release
-- Authentication system (login, register, user profile)
-- Google OAuth integration
-- API response utilities
-- Automatic route structure setup
-- Laravel 11+ support
 
 ---
 
@@ -939,34 +838,21 @@ This package is open-sourced software licensed under the [MIT license](LICENSE).
 
 ---
 
-## 👥 Credits
-
-- **Youssef Ehab** - [youssef.ehab@softigital.com](mailto:youssef.ehab@softigital.com)
-- **Softigital Team** - [https://softigital.com](https://softigital.com)
-
----
-
 ## 🆘 Support
 
-For issues, questions, or contributions:
-
 - **GitHub Issues**: [https://github.com/softigital-dev/core/issues](https://github.com/softigital-dev/core/issues)
-- **Email**: support@softigital.com
-- **Documentation**: [https://github.com/softigital-dev/core](https://github.com/softigital-dev/core)
+- **Author**: Youssef Ehab - youssefehab.ofice@gmail.com
 
 ---
 
 ## 🎯 Roadmap
 
-Future features planned:
-
 - [ ] Email verification flow
 - [ ] Password reset functionality
 - [ ] Two-factor authentication (2FA)
-- [ ] Social auth (Facebook, GitHub, etc.)
+- [ ] Additional OAuth providers (Facebook, GitHub)
 - [ ] Role-based access control (RBAC)
 - [ ] API rate limiting utilities
-- [ ] Audit logging system
 
 ---
 
