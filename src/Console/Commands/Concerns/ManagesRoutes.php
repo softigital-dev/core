@@ -80,10 +80,18 @@ trait ManagesRoutes
             );
         }
 
-        // Remove old api: line (handles both with and without trailing comma)
+        // Remove old api: line (handles various formats)
+        // Pattern matches: api: __DIR__.'/../routes/api.php' or api: __DIR__.'/../routes/api.php',
         $content = preg_replace(
-            '/\s*api:\s*__DIR__\s*\.\s*\'[^\']*\'\s*,?\s*\n/',
-            "\n",
+            '/\s*api\s*:\s*__DIR__\s*\.\s*[\'"][^\'"]*api\.php[\'"]\s*,?\s*\n?/',
+            '',
+            $content,
+        );
+
+        // Also handle the 'using' style if present
+        $content = preg_replace(
+            '/\s*->using\s*\(\s*[\'"]api[\'"]\s*,\s*[^)]+\)\s*,?\s*\n?/',
+            '',
             $content,
         );
 
