@@ -12,6 +12,8 @@ A Laravel package that provides essential authentication components and utilitie
 - **🔐 Authentication System**: Complete authentication with login, register, and user profile endpoints
 - **🌐 Google OAuth**: Ready-to-use Google authentication integration
 - **📦 API Response Utilities**: Standardized JSON response formatting
+- **🛡️ Smart Middleware**: Auto-applied JSON responses & optional authentication
+- **⚙️ Configurable**: Publish and customize middleware behavior
 - **⚡ Quick Installation**: One command to scaffold complete features
 - **🎯 Laravel 11+ Ready**: Optimized for modern Laravel applications
 - **🔄 Route Management**: Automatic v1 API route structure setup
@@ -35,6 +37,82 @@ composer require softigital-dev/core
 ```
 
 The service provider will be automatically registered via Laravel's package auto-discovery.
+
+### Publish Configuration (Optional)
+
+Publish the configuration file to customize middleware behavior:
+
+```bash
+php artisan vendor:publish --tag=softigital-config
+```
+
+This creates `config/softigital-core.php` where you can enable/disable middleware.
+
+---
+
+## 🛡️ Middleware
+
+The package includes two powerful middleware that enhance your API:
+
+### 1. Force JSON Response (Auto-Applied)
+
+Automatically forces all API requests to accept JSON responses. This prevents HTML error pages and ensures consistent API behavior.
+
+**Configuration** (`config/softigital-core.php`):
+```php
+'force_json' => [
+    'enabled' => true,      // Enable/disable the middleware
+    'auto_apply' => true,   // Automatically apply to 'api' middleware group
+],
+```
+
+**What it does:**
+- Sets `Accept: application/json` header for all routes starting with `api/`
+- Ensures Laravel returns JSON for validation errors and exceptions
+- Prevents accidental HTML responses in your API
+
+**Disable it:**
+```php
+// config/softigital-core.php
+'force_json' => [
+    'enabled' => false,
+],
+```
+
+### 2. Optional Sanctum Authentication
+
+Provides optional authentication for routes that work with or without a user.
+
+**Configuration** (`config/softigital-core.php`):
+```php
+'optional_auth' => [
+    'enabled' => true,
+],
+```
+
+**Usage in routes:**
+```php
+// Route works for both authenticated and guest users
+Route::get('/posts', [PostController::class, 'index'])
+    ->middleware('auth.optional');
+
+// In your controller
+public function index(Request $request)
+{
+    $user = $request->user(); // null if not authenticated
+    
+    if ($user) {
+        // Return personalized content
+    } else {
+        // Return public content
+    }
+}
+```
+
+**Use cases:**
+- Public endpoints with personalized content for logged-in users
+- Like/favorite features that work for guests but save for authenticated users
+- Content that's different based on authentication status
 
 ---
 
