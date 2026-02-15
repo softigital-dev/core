@@ -82,15 +82,16 @@ trait ManagesRoutes
 
         // Remove old api: line (handles various formats)
         // Pattern matches: api: __DIR__.'/../routes/api.php' or api: __DIR__.'/../routes/api.php',
+        // Use more specific pattern to avoid removing other lines
         $content = preg_replace(
-            '/\s*api\s*:\s*__DIR__\s*\.\s*[\'"][^\'"]*api\.php[\'"]\s*,?\s*\n?/',
+            '/^(\s*)api\s*:\s*__DIR__\s*\.\s*[\'"][^\'"]*api\.php[\'"]\s*,?\s*$/m',
             '',
             $content,
         );
 
         // Also handle the 'using' style if present
         $content = preg_replace(
-            '/\s*->using\s*\(\s*[\'"]api[\'"]\s*,\s*[^)]+\)\s*,?\s*\n?/',
+            '/^(\s*)api\s*:\s*\$\w+\s*,?\s*$/m',
             '',
             $content,
         );

@@ -32,8 +32,13 @@ trait ManagesComposer
     protected function requirePackage(string $package): bool
     {
         $this->components->info("Installing {$package}...");
+        $this->newLine();
 
-        $result = Process::path(base_path())->run("composer require {$package}");
+        $result = Process::path($this->appPath(''))
+            ->tty()
+            ->run("composer require {$package}");
+
+        $this->newLine();
 
         if ($result->successful()) {
             $this->components->info("{$package} installed successfully");
