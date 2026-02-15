@@ -16,12 +16,14 @@ class InstallCommand extends Command
     use ManagesRoutes;
 
     protected $signature = 'softigital:install
-                            {type : Installation type (auth, google-auth)}
+                            {type? : Installation type (auth, google-auth)}
                             {--force : Overwrite existing files}
                             {--skip-migration : Skip publishing and running migrations}
-                            {--skip-composer : Skip composer package installation}';
+                            {--skip-composer : Skip composer package installation}
+                            {--help : Display help information}
+                            {--h : Display help information}';
 
-    protected $description = 'Install Softigital Core components';
+    protected $description = 'Install Softigital Core components (Auth, Google Auth, and more)';
 
     // ──────────────────────────────────────────────
     // File mappings: stub => destination
@@ -53,6 +55,12 @@ class InstallCommand extends Command
 
     public function handle(): int
     {
+        // Show help if --help or -h is passed, or no type provided
+        if ($this->option('help') || $this->option('h') || !$this->argument('type')) {
+            $this->displayHelp();
+            return self::SUCCESS;
+        }
+
         return match ($this->argument('type')) {
             'auth'        => $this->installAuth(),
             'google-auth' => $this->installGoogleAuth(),
@@ -145,11 +153,76 @@ class InstallCommand extends Command
         }
     }
 
+    protected function displayHelp(): void
+    {
+        $this->components->info('Softigital Core Installation Command');
+        $this->newLine();
+
+        $this->line('<fg=cyan>Usage:</>');
+        $this->line('  php artisan softigital:install <type> [options]');
+        $this->newLine();
+
+        $this->line('<fg=cyan>Available Installation Types:</>');
+        $this->line('  <fg=green>auth</>         Install authentication system');
+        $this->line('                 • AuthController (login, register, me endpoints)');
+        $this->line('                 • AuthService (handles authentication logic)');
+        $this->line('                 • Request validation classes');
+        $this->line('                 • API routes with Sanctum token support');
+        $this->line('                 • ApiResponse utility for consistent responses');
+        $this->newLine();
+        $this->line('  <fg=green>google-auth</>   Install Google OAuth authentication');
+        $this->line('                 • GoogleAuthController (Google ID token verification)');
+        $this->line('                 • Google configuration file');
+        $this->line('                 • Google routes');
+        $this->line('                 • Migration for google_id column');
+        $this->line('                 • Requires: google/apiclient package');
+        $this->newLine();
+
+        $this->line('<fg=cyan>Options:</>');
+        $this->line('  <fg=yellow>--force</>           Overwrite existing files without prompting');
+        $this->line('  <fg=yellow>--skip-migration</>  Skip publishing and running migrations (google-auth)');
+        $this->line('  <fg=yellow>--skip-composer</>   Skip automatic composer package installation');
+        $this->line('  <fg=yellow>--help, -h</>        Display this help message');
+        $this->newLine();
+
+        $this->line('<fg=cyan>Examples:</>');
+        $this->line('  <fg=gray># Install basic authentication</>');
+        $this->line('  php artisan softigital:install auth');
+        $this->newLine();
+        $this->line('  <fg=gray># Install Google OAuth authentication</>');
+        $this->line('  php artisan softigital:install google-auth');
+        $this->newLine();
+        $this->line('  <fg=gray># Force overwrite existing files</>');
+        $this->line('  php artisan softigital:install auth --force');
+        $this->newLine();
+        $this->line('  <fg=gray># Install without running migrations</>');
+        $this->line('  php artisan softigital:install google-auth --skip-migration');
+        $this->newLine();
+
+        $this->line('<fg=cyan>What Gets Installed:</>');
+        $this->line('  • Creates routes/v1/api.php structure');
+        $this->line('  • Updates bootstrap/app.php with v1 routing');
+        $this->line('  • Publishes controllers, services, and request classes');
+        $this->line('  • Configures route files with proper middleware');
+        $this->line('  • Installs required composer packages (when needed)');
+        $this->newLine();
+
+        $this->line('<fg=cyan>Requirements:</>');
+        $this->line('  • Laravel 11 or higher');
+        $this->line('  • Laravel Sanctum (for token-based auth)');
+        $this->newLine();
+
+        $this->line('<fg=gray>For more information, visit:</>');
+        $this->line('<fg=gray>https://github.com/softigital-dev/core</>');
+    }
+
     protected function invalidType(): int
     {
         $this->components->error(
             "Invalid type: '{$this->argument('type')}'. Available types: auth, google-auth",
         );
+        $this->newLine();
+        $this->line('Run <fg=yellow>php artisan softigital:install --help</> for more information.');
 
         return self::FAILURE;
     }
