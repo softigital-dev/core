@@ -19,9 +19,7 @@ class InstallCommand extends Command
                             {type? : Installation type (auth, google-auth)}
                             {--force : Overwrite existing files}
                             {--skip-migration : Skip publishing and running migrations}
-                            {--skip-composer : Skip composer package installation}
-                            {--help : Display help information}
-                            {--h : Display help information}';
+                            {--skip-composer : Skip composer package installation}';
 
     protected $description = 'Install Softigital Core components (Auth, Google Auth, and more)';
 
@@ -56,7 +54,7 @@ class InstallCommand extends Command
     public function handle(): int
     {
         // Show help if --help or -h is passed, or no type provided
-        if ($this->option('help') || $this->option('h') || !$this->argument('type')) {
+        if ($this->option('help') || !$this->argument('type')) {
             $this->displayHelp();
             return self::SUCCESS;
         }
