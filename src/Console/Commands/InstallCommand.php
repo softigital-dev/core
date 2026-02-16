@@ -16,12 +16,12 @@ class InstallCommand extends Command
     use ManagesRoutes;
 
     protected $signature = 'softigital:install
-                            {type? : Installation type (auth, google-auth)}
+                            {type? : Installation type (base, auth, google-auth)}
                             {--force : Overwrite existing files}
                             {--skip-migration : Skip publishing and running migrations}
                             {--skip-composer : Skip composer package installation}';
 
-    protected $description = 'Install Softigital Core components (Auth, Google Auth, and more)';
+    protected $description = 'Install Softigital Core components (Base setup, Auth, Google Auth, and more)';
 
     // ──────────────────────────────────────────────
     // File mappings: stub => destination
@@ -60,6 +60,7 @@ class InstallCommand extends Command
         }
 
         return match ($this->argument('type')) {
+            'base'        => $this->installBase(),
             'auth'        => $this->installAuth(),
             'google-auth' => $this->installGoogleAuth(),
             default       => $this->invalidType(),
@@ -69,6 +70,25 @@ class InstallCommand extends Command
     // ──────────────────────────────────────────────
     // Installers
     // ──────────────────────────────────────────────
+
+    protected function installBase(): int
+    {
+        $this->components->info('Installing Base Setup...');
+        $this->newLine();
+
+        $this->ensureApiRouteInV1();
+        $this->publishFileMap($this->sharedFiles);
+
+        $this->newLine();
+        $this->components->info('Base setup installed successfully!');
+        $this->newLine();
+        $this->components->info('What was configured:');
+        $this->line('  • routes/v1/api.php structure created');
+        $this->line('  • bootstrap/app.php updated for v1 routing');
+        $this->line('  • ApiResponse utility installed');
+
+        return self::SUCCESS;
+    }
 
     protected function installAuth(): int
     {
@@ -161,12 +181,17 @@ class InstallCommand extends Command
         $this->newLine();
 
         $this->line('<fg=cyan>Available Installation Types:</>');
-        $this->line('  <fg=green>auth</>         Install authentication system');
+        $this->line('  <fg=green>base</>          Install base API setup');
+        $this->line('                 • Creates routes/v1/api.php structure');
+        $this->line('                 • Updates bootstrap/app.php for v1 routing');
+        $this->line('                 • Installs ApiResponse utility');
+        $this->newLine();
+        $this->line('  <fg=green>auth</>          Install authentication system');
         $this->line('                 • AuthController (login, register, me endpoints)');
         $this->line('                 • AuthService (handles authentication logic)');
         $this->line('                 • Request validation classes');
         $this->line('                 • API routes with Sanctum token support');
-        $this->line('                 • ApiResponse utility for consistent responses');
+        $this->line('                 • Includes ApiResponse utility');
         $this->newLine();
         $this->line('  <fg=green>google-auth</>   Install Google OAuth authentication');
         $this->line('                 • GoogleAuthController (Google ID token verification)');
@@ -184,6 +209,9 @@ class InstallCommand extends Command
         $this->newLine();
 
         $this->line('<fg=cyan>Examples:</>');
+        $this->line('  <fg=gray># Install base API setup</>');
+        $this->line('  php artisan softigital:install base');
+        $this->newLine();
         $this->line('  <fg=gray># Install basic authentication</>');
         $this->line('  php artisan softigital:install auth');
         $this->newLine();
@@ -217,7 +245,7 @@ class InstallCommand extends Command
     protected function invalidType(): int
     {
         $this->components->error(
-            "Invalid type: '{$this->argument('type')}'. Available types: auth, google-auth",
+            "Invalid type: '{$this->argument('type')}'. Available types: base, auth, google-auth",
         );
         $this->newLine();
         $this->line('Run <fg=yellow>php artisan softigital:install --help</> for more information.');
