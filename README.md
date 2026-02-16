@@ -292,8 +292,6 @@ class PostService
 
 ## 🛡️ Middleware
 
-## 🛡️ Middleware
-
 The package includes two smart middleware that enhance your API automatically.
 
 ### Force JSON Response
@@ -856,4 +854,4 @@ This package is open-sourced software licensed under the [MIT license](LICENSE).
 
 ---
 
-<p align="center">Made with ❤️ by <a href="https://softigital.com">Softigital</a></p>
+<p align="center">Made with ❤️ by Youssef Ehab</p>
