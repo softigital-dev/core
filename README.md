@@ -38,8 +38,9 @@ Softigital Core is designed to eliminate repetitive boilerplate code and acceler
 - 🌐 Google OAuth integration with ID token verification
 - 📦 Standardized JSON response formatting
 - 🛡️ Smart middleware (auto-applied JSON responses, optional auth)
-- 🎨 Code generators for routes and services
+- 🎨 Code generators for CRUD, routes, and services
 - 📂 Automatic API route structure (v1 versioning)
+- ⚡ One-command CRUD generation (model, migration, controller, service, requests, resource, routes)
 - ⚙️ Fully configurable via published config file
 
 ---
@@ -76,9 +77,22 @@ This creates `config/softigital-core.php` for middleware configuration.
 
 ## 🚀 Quick Start Guide
 
-### 1. Install Basic Authentication
+### 1. Install Base Setup (Recommended First Step)
 
-Install a complete authentication system with one command:
+Set up the foundational API structure:
+
+```bash
+php artisan softigital:install base
+```
+
+**What you get:**
+- routes/v1/api.php structure
+- bootstrap/app.php configured for v1 routing
+- ApiResponse utility for standardized responses
+
+### 2. Install Authentication (Optional)
+
+Add a complete authentication system:
 
 ```bash
 php artisan softigital:install auth
@@ -90,7 +104,7 @@ php artisan softigital:install auth
 - Profile endpoint (`GET /api/v1/auth/me`)
 - Complete controllers, services, requests, and routes
 
-### 2. Generate Additional Resources
+### 3. Generate Additional Resources
 
 Create a full CRUD API in seconds:
 
@@ -107,7 +121,7 @@ php artisan make:route posts --controller=PostController --api
 php artisan make:service Post --model=Post --repository
 ```
 
-### 3. Start Using
+### 4. Start Using
 
 Your API is ready! The middleware automatically handles JSON responses.
 
@@ -132,6 +146,7 @@ Install pre-built authentication components.
 
 | Type | Description | What Gets Installed |
 |------|-------------|---------------------|
+| `base` | Base API setup | routes/v1 structure, bootstrap/app.php config, ApiResponse utility |
 | `auth` | Basic authentication | AuthController, AuthService, LoginRequest, RegisterRequest, routes |
 | `google-auth` | Google OAuth | GoogleAuthController, GoogleLoginRequest, google config, migration, google/apiclient package |
 
@@ -143,6 +158,9 @@ Install pre-built authentication components.
 **Examples:**
 
 ```bash
+# Install base setup (recommended first step)
+php artisan softigital:install base
+
 # Install basic authentication
 php artisan softigital:install auth
 
