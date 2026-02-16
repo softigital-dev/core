@@ -1,0 +1,50 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\{{ MODEL_NAME }};
+use Illuminate\Pagination\LengthAwarePaginator;
+
+class {{ SERVICE_NAME }}
+{
+    /**
+     * Get all {{ MODEL_VARIABLE_PLURAL }} with pagination.
+     */
+    public function getAll(int $perPage = 15): LengthAwarePaginator
+    {
+        return {{ MODEL_NAME }}::paginate($perPage);
+    }
+
+    /**
+     * Get a specific {{ MODEL_VARIABLE }} by ID.
+     */
+    public function getById(int $id): ?{{ MODEL_NAME }}
+    {
+        return {{ MODEL_NAME }}::find($id);
+    }
+
+    /**
+     * Create a new {{ MODEL_VARIABLE }}.
+     */
+    public function create(array $data): {{ MODEL_NAME }}
+    {
+        return {{ MODEL_NAME }}::create($data);
+    }
+
+    /**
+     * Update an existing {{ MODEL_VARIABLE }}.
+     */
+    public function update({{ MODEL_NAME }} ${{ MODEL_VARIABLE }}, array $data): {{ MODEL_NAME }}
+    {
+        ${{ MODEL_VARIABLE }}->update($data);
+        return ${{ MODEL_VARIABLE }}->refresh();
+    }
+
+    /**
+     * Delete a {{ MODEL_VARIABLE }}.
+     */
+    public function delete({{ MODEL_NAME }} ${{ MODEL_VARIABLE }}): bool
+    {
+        return ${{ MODEL_VARIABLE }}->delete();
+    }
+}

@@ -95,6 +95,11 @@ php artisan softigital:install auth
 Create a full CRUD API in seconds:
 
 ```bash
+# Create complete CRUD structure for a model
+php artisan make:crud Post
+
+# Or create individual components:
+
 # Create route file with API resource routes
 php artisan make:route posts --controller=PostController --api
 
@@ -247,6 +252,89 @@ app/Services/
 └── Blog/
     └── PostService.php
 ```
+
+---
+
+#### `make:crud {name}`
+
+Generate a complete CRUD structure for a model with all necessary files in one command.
+
+**What Gets Generated:**
+- ✅ Model in `app/Models/`
+- ✅ Migration in `database/migrations/`
+- ✅ Service in `app/Services/`
+- ✅ Controller in `app/Http/Controllers/`
+- ✅ Store Request (POST) in `app/Http/Requests/`
+- ✅ Update Request (PATCH) in `app/Http/Requests/`
+- ✅ Resource in `app/Http/Resources/`
+- ✅ Route file in `routes/v1/`
+
+**Options:**
+- `--api-prefix=v1` : API version prefix for routes (default: v1)
+- `--force` : Overwrite existing files without prompting
+
+**Examples:**
+
+```bash
+# Generate CRUD for Post model
+php artisan make:crud Post
+
+# Generate with different API version
+php artisan make:crud Product --api-prefix=v2
+
+# Overwrite existing files
+php artisan make:crud BlogPost --force
+```
+
+**Generated Files for `php artisan make:crud Post`:**
+```
+app/
+├── Models/Post.php (empty - define your fields)
+├── Services/PostService.php (full CRUD methods)
+├── Http/
+│   ├── Controllers/PostController.php (complete REST API)
+│   ├── Requests/
+│   │   ├── StorePostRequest.php (empty - add validation rules)
+│   │   └── UpdatePostRequest.php (empty - add validation rules)
+│   └── Resources/PostResource.php (empty - define response shape)
+database/migrations/2025_xx_xx_xxxxxx_create_posts_table.php (empty)
+routes/v1/posts.php (RESTful routes with auth:sanctum)
+```
+
+**Generated Controller Methods:**
+- `index()` - GET /posts (list with pagination)
+- `show($id)` - GET /posts/{id} (single resource)
+- `store(StorePostRequest)` - POST /posts (create)
+- `update(UpdatePostRequest, $id)` - PATCH /posts/{id} (update)
+- `destroy($id)` - DELETE /posts/{id} (delete)
+
+**Generated Routes:**
+```php
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('posts', [PostController::class, 'index']);
+    Route::get('posts/{id}', [PostController::class, 'show']);
+    Route::post('posts', [PostController::class, 'store']);
+    Route::patch('posts/{id}', [PostController::class, 'update']);
+    Route::delete('posts/{id}', [PostController::class, 'destroy']);
+});
+```
+
+**Next Steps After Generation:**
+1. Define model properties and relationships in `app/Models/Post.php`
+2. Add table columns in the migration file and run `php artisan migrate`
+3. Define validation rules in `StorePostRequest.php` and `UpdatePostRequest.php`
+4. Customize the resource fields in `PostResource.php`
+5. Register the route file in `routes/api.php`:
+   ```php
+   require __DIR__.'/v1/posts.php';
+   ```
+
+**Controller Features:**
+- Uses service layer for clean separation of concerns
+- Returns proper HTTP status codes (200, 201, 404, 500)
+- Automatic pagination with metadata for index endpoint
+- Uses Resource for consistent response formatting
+- Integrates with ApiResponse utility for standardized responses
 
 **Generated service with `--repository` (`app/Services/PostService.php`):**
 ```php

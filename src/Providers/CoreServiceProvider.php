@@ -5,6 +5,7 @@ namespace SoftigitalDev\Core\Providers;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 use SoftigitalDev\Core\Console\Commands\Create\CreateRouteCommand;
+use SoftigitalDev\Core\Console\Commands\Create\MakeCrudCommand;
 use SoftigitalDev\Core\Console\Commands\Create\MakeServiceCommand;
 use SoftigitalDev\Core\Console\Commands\InstallCommand;
 use SoftigitalDev\Core\Http\Middleware\ForceJsonResponseForApiRequests;
@@ -25,6 +26,7 @@ class CoreServiceProvider extends ServiceProvider
                 InstallCommand::class,
                 CreateRouteCommand::class,
                 MakeServiceCommand::class,
+                MakeCrudCommand::class,
             ]);
         }
 

@@ -1,0 +1,117 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\{{ STORE_REQUEST_NAME }};
+use App\Http\Requests\{{ UPDATE_REQUEST_NAME }};
+use App\Http\Resources\{{ RESOURCE_NAME }};
+use App\Services\{{ SERVICE_NAME }};
+use App\Utils\ApiResponse;
+
+class {{ CONTROLLER_NAME }} extends Controller
+{
+    public function __construct(
+        protected {{ SERVICE_NAME }} $service
+    ) {}
+
+    /**
+     * Display a listing of the {{ MODEL_VARIABLE_PLURAL }}.
+     */
+    public function index()
+    {
+        try {
+            ${{ MODEL_VARIABLE_PLURAL }} = $this->service->getAll(request('per_page', 15));
+            
+            return ApiResponse::success(
+                message: '{{ MODEL_NAME_PLURAL }} retrieved successfully',
+                data: ${{ MODEL_VARIABLE_PLURAL }},
+                resource: {{ RESOURCE_NAME }}::class
+            );
+        } catch (\Exception $e) {
+            return ApiResponse::error($e->getMessage());
+        }
+    }
+
+    /**
+     * Display the specified {{ MODEL_VARIABLE }}.
+     */
+    public function show(int $id)
+    {
+        try {
+            ${{ MODEL_VARIABLE }} = $this->service->getById($id);
+
+            if (!${{ MODEL_VARIABLE }}) {
+                return ApiResponse::notFound('{{ MODEL_NAME }} not found');
+            }
+
+            return ApiResponse::success(
+                message: '{{ MODEL_NAME }} retrieved successfully',
+                data: new {{ RESOURCE_NAME }}(${{ MODEL_VARIABLE }})
+            );
+        } catch (\Exception $e) {
+            return ApiResponse::error($e->getMessage());
+        }
+    }
+
+    /**
+     * Store a newly created {{ MODEL_VARIABLE }}.
+     */
+    public function store({{ STORE_REQUEST_NAME }} $request)
+    {
+        try {
+            ${{ MODEL_VARIABLE }} = $this->service->create($request->validated());
+
+            return ApiResponse::created(
+                message: '{{ MODEL_NAME }} created successfully',
+                data: new {{ RESOURCE_NAME }}(${{ MODEL_VARIABLE }})
+            );
+        } catch (\Exception $e) {
+            return ApiResponse::error($e->getMessage());
+        }
+    }
+
+    /**
+     * Update the specified {{ MODEL_VARIABLE }}.
+     */
+    public function update({{ UPDATE_REQUEST_NAME }} $request, int $id)
+    {
+        try {
+            ${{ MODEL_VARIABLE }} = $this->service->getById($id);
+
+            if (!${{ MODEL_VARIABLE }}) {
+                return ApiResponse::notFound('{{ MODEL_NAME }} not found');
+            }
+
+            $updated{{ MODEL_NAME }} = $this->service->update(${{ MODEL_VARIABLE }}, $request->validated());
+
+            return ApiResponse::success(
+                message: '{{ MODEL_NAME }} updated successfully',
+                data: new {{ RESOURCE_NAME }}($updated{{ MODEL_NAME }})
+            );
+        } catch (\Exception $e) {
+            return ApiResponse::error($e->getMessage());
+        }
+    }
+
+    /**
+     * Remove the specified {{ MODEL_VARIABLE }}.
+     */
+    public function destroy(int $id)
+    {
+        try {
+            ${{ MODEL_VARIABLE }} = $this->service->getById($id);
+
+            if (!${{ MODEL_VARIABLE }}) {
+                return ApiResponse::notFound('{{ MODEL_NAME }} not found');
+            }
+
+            $this->service->delete(${{ MODEL_VARIABLE }});
+
+            return ApiResponse::success(
+                message: '{{ MODEL_NAME }} deleted successfully'
+            );
+        } catch (\Exception $e) {
+            return ApiResponse::error($e->getMessage());
+        }
+    }
+}
