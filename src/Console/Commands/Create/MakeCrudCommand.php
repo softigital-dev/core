@@ -6,10 +6,12 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use SoftigitalDev\Core\Console\Commands\Concerns\ManagesFiles;
+use SoftigitalDev\Core\Console\Commands\Concerns\ManagesRoutes;
 
 class MakeCrudCommand extends Command
 {
     use ManagesFiles;
+    use ManagesRoutes;
 
     protected $signature = 'make:crud 
                             {name : The name of the model (e.g., Post, BlogPost)}
@@ -144,9 +146,7 @@ class MakeCrudCommand extends Command
         );
 
         if ($published) {
-            $this->newLine();
-            $this->components->warn("Don't forget to register the route file:");
-            $this->line("  require __DIR__.'/{$apiPrefix}/{$routeFileName}.php';");
+            $this->addRouteRequire("{$routeFileName}.php");
         }
     }
 

@@ -21,10 +21,17 @@ class ForceJsonResponseForApiRequests
             return $next($request);
         }
 
-        if (Str::startsWith($request->path(), 'api')) {
-            $request->headers->set('Accept', 'application/json');
+        // Force Accept header to application/json
+        // This middleware is applied to the 'api' group, so all requests here are API requests
+        $request->headers->set('Accept', 'application/json');
+
+        $response = $next($request);
+
+        // Ensure the response has JSON Content-Type if not already set
+        if (!$response->headers->has('Content-Type')) {
+            $response->headers->set('Content-Type', 'application/json');
         }
 
-        return $next($request);
+        return $response;
     }
 }
