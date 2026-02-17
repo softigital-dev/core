@@ -1,0 +1,22 @@
+name: Mirror to Bitbucket
+
+on:
+  push:
+    branches: [ "**" ]
+  delete:
+
+jobs:
+  to-bitbucket:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required to mirror full history
+      
+      - uses: pixta-dev/repository-mirroring-action@v1
+        with:
+          target_repo_url:
+            https://youssefehab@bitbucket.org/softigital/laravel-tool-kit.git
+          # Bitbucket now requires this specific static username for API tokens
+          username: x-bitbucket-api-token-auth
+          password: ${{ secrets.BITBUCKET_API_TOKEN }}
