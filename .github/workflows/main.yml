@@ -1,0 +1,21 @@
+name: Mirror to Bitbucket
+
+on:
+  push:
+    branches: [ "**" ]
+  delete:
+
+jobs:
+  to-bitbucket:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Mirror to Bitbucket
+        uses: pixta-dev/repository-mirroring-action@v1
+        with:
+          target_repo_url:
+            https://x-token-auth:${{ secrets.BITBUCKET_API_TOKEN }}@bitbucket.org/softigital/laravel-tool-kit.git
