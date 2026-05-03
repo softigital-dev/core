@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use SoftigitalDev\Core\Console\Commands\Concerns\ManagesComposer;
 use SoftigitalDev\Core\Console\Commands\Concerns\ManagesFiles;
 use SoftigitalDev\Core\Console\Commands\Concerns\ManagesMigrations;
+use SoftigitalDev\Core\Console\Commands\Concerns\ManagesProviders;
 use SoftigitalDev\Core\Console\Commands\Concerns\ManagesRoutes;
 
 class InstallCommand extends Command
@@ -13,6 +14,7 @@ class InstallCommand extends Command
     use ManagesComposer;
     use ManagesFiles;
     use ManagesMigrations;
+    use ManagesProviders;
     use ManagesRoutes;
 
     protected $signature = 'softigital:install
@@ -29,7 +31,10 @@ class InstallCommand extends Command
 
     /** Files shared by all installation types. */
     protected array $sharedFiles = [
-        'Utils/ApiResponse.stub' => 'app/Utils/ApiResponse.php',
+        'Utils/ApiResponse.stub'                   => 'app/Utils/ApiResponse.php',
+        'Http/Middleware/ForceJsonResponse.stub'   => 'app/Http/Middleware/ForceJsonResponse.php',
+        'Http/Middleware/OptionalSanctumAuth.stub' => 'app/Http/Middleware/OptionalSanctumAuth.php',
+        'Providers/SoftigitalServiceProvider.stub' => 'app/Providers/SoftigitalServiceProvider.php',
     ];
 
     /** Files specific to the auth installation. */
@@ -78,13 +83,17 @@ class InstallCommand extends Command
 
         $this->ensureApiRouteInV1();
         $this->publishFileMap($this->sharedFiles);
+        $this->ensureProviderRegistered();
 
         $this->newLine();
         $this->components->info('Base setup installed successfully!');
         $this->newLine();
         $this->components->info('What was configured:');
-        $this->line('  • routes/v1/api.php structure created');
-        $this->line('  • bootstrap/app.php updated for v1 routing');
+        $this->line('  • routes/v1/api.php created');
+        $this->line('  • app/Http/Middleware/ForceJsonResponse.php published');
+        $this->line('  • app/Http/Middleware/OptionalSanctumAuth.php published');
+        $this->line('  • app/Providers/SoftigitalServiceProvider.php published');
+        $this->line('  • SoftigitalServiceProvider registered in bootstrap/providers.php');
         $this->line('  • ApiResponse utility installed');
 
         return self::SUCCESS;
@@ -99,6 +108,7 @@ class InstallCommand extends Command
         $this->publishFileMap($this->sharedFiles);
         $this->publishFileMap($this->authFiles);
         $this->addRouteRequire('auth.php');
+        $this->ensureProviderRegistered();
 
         $this->newLine();
         $this->components->info('Auth installed successfully!');
@@ -145,7 +155,10 @@ class InstallCommand extends Command
         // 5. Wire route
         $this->addRouteRequire('google.php');
 
-        // 6. Done
+        // 6. Register provider
+        $this->ensureProviderRegistered();
+
+        // 7. Done
         $this->newLine();
         $this->components->info('Google Auth installed successfully!');
         $this->newLine();
@@ -160,6 +173,11 @@ class InstallCommand extends Command
     // ──────────────────────────────────────────────
     // Helpers
     // ──────────────────────────────────────────────
+
+    protected function ensureProviderRegistered(): void
+    {
+        $this->addProviderToBootstrap('App\\Providers\\SoftigitalServiceProvider');
+    }
 
     /**
      * Publish an array of stub => destination mappings.
@@ -182,8 +200,9 @@ class InstallCommand extends Command
 
         $this->line('<fg=cyan>Available Installation Types:</>');
         $this->line('  <fg=green>base</>          Install base API setup');
-        $this->line('                 • Creates routes/v1/api.php structure');
-        $this->line('                 • Updates bootstrap/app.php for v1 routing');
+        $this->line('                 • Creates routes/v1/api.php');
+        $this->line('                 • Publishes middleware and SoftigitalServiceProvider to App\\ namespace');
+        $this->line('                 • Registers SoftigitalServiceProvider in bootstrap/providers.php');
         $this->line('                 • Installs ApiResponse utility');
         $this->newLine();
         $this->line('  <fg=green>auth</>          Install authentication system');
@@ -226,8 +245,10 @@ class InstallCommand extends Command
         $this->newLine();
 
         $this->line('<fg=cyan>What Gets Installed:</>');
-        $this->line('  • Creates routes/v1/api.php structure');
-        $this->line('  • Updates bootstrap/app.php with v1 routing');
+        $this->line('  • Creates routes/v1/api.php');
+        $this->line('  • Publishes middleware classes to app/Http/Middleware/');
+        $this->line('  • Publishes SoftigitalServiceProvider to app/Providers/');
+        $this->line('  • Registers provider in bootstrap/providers.php (never touches bootstrap/app.php)');
         $this->line('  • Publishes controllers, services, and request classes');
         $this->line('  • Configures route files with proper middleware');
         $this->line('  • Installs required composer packages (when needed)');

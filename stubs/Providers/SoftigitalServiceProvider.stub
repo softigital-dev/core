@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Providers;
+
+use App\Http\Middleware\ForceJsonResponse;
+use App\Http\Middleware\OptionalSanctumAuth;
+use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\ServiceProvider;
+
+class SoftigitalServiceProvider extends ServiceProvider
+{
+    public function boot(): void
+    {
+        /** @var Router $router */
+        $router = $this->app->make(Router::class);
+
+        $router->aliasMiddleware('auth.optional', OptionalSanctumAuth::class);
+        $router->pushMiddlewareToGroup('api', ForceJsonResponse::class);
+
+        Route::prefix('api/v1')
+            ->middleware('api')
+            ->group(base_path('routes/v1/api.php'));
+    }
+}

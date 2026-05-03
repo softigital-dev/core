@@ -1,0 +1,22 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+
+class OptionalSanctumAuth
+{
+    public function handle(Request $request, Closure $next)
+    {
+        if ($request->bearerToken()) {
+            try {
+                auth()->guard('sanctum')->user();
+            } catch (\Exception $e) {
+                // Invalid token — continue as guest
+            }
+        }
+
+        return $next($request);
+    }
+}

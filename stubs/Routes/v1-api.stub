@@ -1,0 +1,14 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| API V1 Routes
+|--------------------------------------------------------------------------
+|
+| All routes in this file are automatically prefixed with /api/v1 and
+| assigned the "api" middleware group via SoftigitalServiceProvider.
+| Add sub-route files below using require __DIR__.'/filename.php';
+|
+*/
