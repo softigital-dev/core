@@ -70,7 +70,7 @@ class ListCommand extends Command
 
         $toCheck = $type ? [$type => $this->types[$type]] : $this->types;
 
-        foreach ($toCheck as $key => $config) {
+        foreach ($toCheck as $config) {
             $this->printInstallType($config['label'], $config['files'], $config['command']);
         }
 
@@ -122,7 +122,7 @@ class ListCommand extends Command
         $this->line('<fg=cyan>Available Types:</>');
         $this->line('  <fg=green>base</>         Base API setup (middleware, provider, ApiResponse, routes/v1)');
         $this->line('  <fg=green>auth</>         Authentication (AuthController, AuthService, requests, routes)');
-        $this->line('  <fg=green>google-auth</>  Google OAuth (GoogleAuthController, config, migration, routes)');
+        $this->line('  <fg=green>google-auth</>  Google OAuth (GoogleAuthController, config, routes)');
         $this->newLine();
 
         $this->line('<fg=cyan>Examples:</>');
